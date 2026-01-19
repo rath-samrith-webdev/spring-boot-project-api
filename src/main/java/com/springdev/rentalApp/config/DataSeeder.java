@@ -13,9 +13,11 @@ import com.springdev.rentalApp.repositories.UserRepository;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
-    public DataSeeder(UserRepository userRepository) {
+    public DataSeeder(UserRepository userRepository, org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -26,12 +28,16 @@ public class DataSeeder implements CommandLineRunner {
             user1.setLastName("Doe");
             user1.setEmail("john.doe@example.com");
             user1.setDateOfBirth(LocalDate.of(1990, 1, 1));
+            user1.setPassword(passwordEncoder.encode("password123"));
+            user1.setRole("ROLE_USER");
 
             User user2 = new User();
             user2.setFirstName("Jane");
             user2.setLastName("Smith");
             user2.setEmail("jane.smith@example.com");
             user2.setDateOfBirth(LocalDate.of(1995, 5, 15));
+            user2.setPassword(passwordEncoder.encode("password123"));
+            user2.setRole("ROLE_ADMIN");
 
             userRepository.saveAll(List.of(user1, user2));
             System.out.println("Database seeded with initial users.");
