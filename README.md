@@ -44,6 +44,12 @@ Use the Maven wrapper to start the application:
 ./mvnw spring-boot:run
 ```
 
+If port `8080` is already in use on your machine, run on a different port:
+
+```bash
+SERVER_PORT=8081 ./mvnw spring-boot:run
+```
+
 The server will start on `http://localhost:8080`.
 
 ## Running with Docker
@@ -55,8 +61,8 @@ You can also run the application and database using Docker Compose.
     ```properties
     DB_ROOT_PASSWORD=your-password
     DB_DATABASE=spring-api
-    DB_USER=root
-    DB_PASSWORD=rath
+    DB_USER=rentalapp
+    DB_PASSWORD=your-password
     ```
 3.  Run the following command:
     ```bash
