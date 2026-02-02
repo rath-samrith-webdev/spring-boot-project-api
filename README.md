@@ -45,6 +45,11 @@ Use the Maven wrapper to start the application:
 
 The server will start on `http://localhost:8080`.
 
+## API Documentation
+
+- **Swagger UI**: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- **OpenAPI JSON**: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
 ## API Endpoints
 
 | Method | Endpoint | Description |

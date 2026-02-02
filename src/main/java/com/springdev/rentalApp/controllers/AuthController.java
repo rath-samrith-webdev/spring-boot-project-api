@@ -1,62 +1,35 @@
 package com.springdev.rentalApp.controllers;
 
-import com.springdev.rentalApp.config.security.JwtUtils;
-import com.springdev.rentalApp.dtos.AuthRequest;
-import com.springdev.rentalApp.dtos.AuthResponse;
-import com.springdev.rentalApp.dtos.UserDTO;
-import com.springdev.rentalApp.entities.User;
-import com.springdev.rentalApp.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.springdev.rentalApp.dtos.AuthRequest;
+import com.springdev.rentalApp.services.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthController.class);
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthService authService;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtils jwtUtils;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
-        return ResponseEntity.ok(new AuthResponse(jwt));
+        return ResponseEntity.ok(authService.login(authRequest));
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+    public ResponseEntity<?> registerUser(@RequestBody com.springdev.rentalApp.dtos.RegisterRequest registerRequest) {
+        try {
+            return ResponseEntity.ok(authService.register(registerRequest));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        // Create new user's account
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        if (user.getRole() == null || user.getRole().isEmpty()) {
-            user.setRole("ROLE_USER");
-        }
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok("User registered successfully!");
     }
 }
