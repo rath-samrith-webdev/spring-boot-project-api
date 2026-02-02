@@ -1,10 +1,8 @@
 package com.springdev.rentalApp.dtos;
 
-
-
-public record UserDTO(
-    Long id,
+public record RegisterRequest(
     String firstName,
     String lastName,
-    String email
+    String email,
+    String password
 ) {}

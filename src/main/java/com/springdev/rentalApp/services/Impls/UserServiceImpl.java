@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService {
         user.setFirstName(UserDTO.firstName());
         user.setLastName(UserDTO.lastName());
         user.setEmail(UserDTO.email());
-        user.setDateOfBirth(UserDTO.dateOfBirth());
         User updatedUser = userRepository.save(user);
         return userMapper.toDto(updatedUser);
     }
