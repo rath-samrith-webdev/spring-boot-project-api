@@ -35,6 +35,7 @@ Initial data is automatically populated by the [DataSeeder.java](src/main/java/c
 - It checks if the `user` table is empty on startup.
 - If empty, it adds pre-defined users (John Doe, Jane Smith).
 
+
 ## Running the Application
 
 Use the Maven wrapper to start the application:
@@ -44,6 +45,28 @@ Use the Maven wrapper to start the application:
 ```
 
 The server will start on `http://localhost:8080`.
+
+## Running with Docker
+
+You can also run the application and database using Docker Compose.
+
+1.  Make sure you have [Docker](https://www.docker.com/products/docker-desktop) installed.
+2.  Create a `.env` file in the root directory with the following content (adjust values as needed):
+    ```properties
+    DB_ROOT_PASSWORD=your-password
+    DB_DATABASE=spring-api
+    DB_USER=root
+    DB_PASSWORD=rath
+    ```
+3.  Run the following command:
+    ```bash
+    docker compose up --build
+    ```
+4.  The application will be accessible at `http://localhost:8080`.
+5.  To stop the services, run:
+    ```bash
+    docker compose down
+    ```
 
 ## API Documentation
 
