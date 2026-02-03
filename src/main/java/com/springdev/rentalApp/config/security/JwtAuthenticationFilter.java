@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.springdev.rentalApp.services.TokenRevocationService;
+
 import java.io.IOException;
 
 @Component
@@ -27,21 +29,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    @Autowired
+    private TokenRevocationService tokenRevocationService;
+
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
-        String requestPath = request.getRequestURI();
-        if (requestPath.startsWith("/api/auth/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         try {
             String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null && jwtUtils.validateJwtToken(jwt) && !tokenRevocationService.isRevoked(jwt)) {
                 String email = jwtUtils.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);

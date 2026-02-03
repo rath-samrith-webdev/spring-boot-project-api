@@ -13,6 +13,11 @@ import com.springdev.rentalApp.dtos.AuthResponse;
 import com.springdev.rentalApp.entities.User;
 import com.springdev.rentalApp.repositories.UserRepository;
 import com.springdev.rentalApp.services.AuthService;
+import com.springdev.rentalApp.services.TokenRevocationService;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -21,12 +26,14 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final TokenRevocationService tokenRevocationService;
 
-    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils, TokenRevocationService tokenRevocationService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
+        this.tokenRevocationService = tokenRevocationService;
     }
 
     @Override
@@ -41,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String register(com.springdev.rentalApp.dtos.RegisterRequest request) {
+    public AuthResponse register(com.springdev.rentalApp.dtos.RegisterRequest request) {
         if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new RuntimeException("Error: Email is already in use!");
         }
@@ -50,19 +57,41 @@ public class AuthServiceImpl implements AuthService {
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
+        user.setCurrentAddress(request.currentAddress());
+        user.setPhoneNumber(request.phoneNumber());
         user.setPassword(passwordEncoder.encode(request.password()));
-        // Wait, standard UserDTO usually doesn't return password, but for registration input it must have it.
-        // I might need a separate RegisterRequest DTO or reuse UserDTO if it has password field.
-        // Let's check UserDTO.
-
-        // If UserDTO doesn't have password, I cannot use it for registration.
-        // I will assume for now I need to check UserDTO.
 
         user.setRole("ROLE_USER");
         user.setIsActive(true);
 
         userRepository.save(user);
 
-        return "User registered successfully!";
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        return new AuthResponse(jwt);
+    }
+
+    @Override
+    public void logout(String rawToken) {
+        if (rawToken == null || rawToken.isBlank()) {
+            SecurityContextHolder.clearContext();
+            return;
+        }
+
+        LocalDateTime expiresAt = null;
+        try {
+            Date exp = jwtUtils.getExpirationDateFromJwtToken(rawToken);
+            if (exp != null) {
+                expiresAt = exp.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            }
+        } catch (Exception ignored) {
+            // If token parsing fails, still clear context; revocation is best-effort.
+        }
+
+        tokenRevocationService.revoke(rawToken, expiresAt);
+        SecurityContextHolder.clearContext();
     }
 }
