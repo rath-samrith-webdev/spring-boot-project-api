@@ -30,7 +30,7 @@ public class AuthController {
     
     @PostMapping("/login")
     @Operation(
-        summary = "Logiing for a existing user",
+        summary = "Logging in an existing user",
         requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             content = @Content(
