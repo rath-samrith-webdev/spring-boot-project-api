@@ -5,5 +5,6 @@ import com.springdev.rentalApp.dtos.AuthResponse;
 
 public interface AuthService {
     AuthResponse login(AuthRequest authRequest);
-    String register(com.springdev.rentalApp.dtos.RegisterRequest registerRequest);
+    AuthResponse register(com.springdev.rentalApp.dtos.RegisterRequest registerRequest);
+    void logout(String rawToken);
 }

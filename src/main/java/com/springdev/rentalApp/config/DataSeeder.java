@@ -57,18 +57,22 @@ public class DataSeeder implements CommandLineRunner {
             user1.setFirstName("John");
             user1.setLastName("Doe");
             user1.setEmail("john.doe@example.com");
+            user1.setCurrentAddress("123 Main St, Anytown, USA");   
+            user1.setPhoneNumber("555-1234");   
             user1.setPassword(passwordEncoder.encode("password123"));
             user1.setRole("ROLE_USER");
             user1.setIsActive(true);
             userRepository.save(user1);
         }
 
-        if (userRepository.findByEmail("jane.smith@example.com").isEmpty()) {
+        if (userRepository.findByEmail("admin@java.com").isEmpty()) {
             User user2 = new User();
-            user2.setFirstName("Jane");
+            user2.setFirstName("Admin");
             user2.setLastName("Smith");
-            user2.setEmail("jane.smith@example.com");
-            user2.setPassword(passwordEncoder.encode("password123"));
+            user2.setEmail("admin@java.com");
+            user2.setCurrentAddress("456 Elm St, Othertown, USA");
+            user2.setPhoneNumber("555-5678");
+            user2.setPassword(passwordEncoder.encode("adminpassword"));
             user2.setRole("ROLE_ADMIN");
             user2.setIsActive(true);
             userRepository.save(user2);
