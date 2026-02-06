@@ -14,6 +14,11 @@ public class UtilityMapper {
             utility.getUser().getId(),
             utility.getLabel(),
             utility.getDescription(),
+            utility.getType(),
+            utility.getProvider(),
+            utility.getAmount(),
+            utility.getDueDate(),
+            utility.getStatus(),
             utility.getCreatedAt()
         );
     }
@@ -24,6 +29,11 @@ public class UtilityMapper {
         utility.setUser(user);
         utility.setLabel(dto.label());
         utility.setDescription(dto.description());
+        utility.setType(dto.type());
+        utility.setProvider(dto.provider());
+        utility.setAmount(dto.amount());
+        utility.setDueDate(dto.dueDate());
+        utility.setStatus(dto.status());
         return utility;
     }
 }

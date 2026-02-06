@@ -56,6 +56,11 @@ public class UtilityServiceImpl implements UtilityService {
 
         utility.setLabel(utilityDto.label());
         utility.setDescription(utilityDto.description());
+        utility.setType(utilityDto.type());
+        utility.setProvider(utilityDto.provider());
+        utility.setAmount(utilityDto.amount());
+        utility.setDueDate(utilityDto.dueDate());
+        utility.setStatus(utilityDto.status());
 
         Utility updatedUtility = utilityRepository.save(utility);
         return utilityMapper.toDto(updatedUtility);
