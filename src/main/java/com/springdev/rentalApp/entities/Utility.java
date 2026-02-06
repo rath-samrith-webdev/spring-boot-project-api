@@ -35,6 +35,17 @@ public class Utility {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    private String type;
+
+    private String provider;
+
+    private java.math.BigDecimal amount;
+
+    @Column(name = "due_date")
+    private LocalDateTime dueDate;
+
+    private String status;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -59,4 +70,19 @@ public class Utility {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
+    public String getProvider() { return provider; }
+    public void setProvider(String provider) { this.provider = provider; }
+
+    public java.math.BigDecimal getAmount() { return amount; }
+    public void setAmount(java.math.BigDecimal amount) { this.amount = amount; }
+
+    public LocalDateTime getDueDate() { return dueDate; }
+    public void setDueDate(LocalDateTime dueDate) { this.dueDate = dueDate; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

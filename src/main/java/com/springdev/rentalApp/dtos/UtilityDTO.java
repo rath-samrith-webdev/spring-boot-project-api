@@ -7,5 +7,10 @@ public record UtilityDTO(
     Long userId,
     String label,
     String description,
-    LocalDateTime createdAt
+    String type,
+    String provider,
+    java.math.BigDecimal amount,
+    java.time.LocalDateTime dueDate,
+    String status,
+    java.time.LocalDateTime createdAt
 ) {}
