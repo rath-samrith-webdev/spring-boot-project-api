@@ -7,4 +7,5 @@ public interface PaymentService {
     PaymentDTO createPayment(PaymentDTO paymentDto);
     List<PaymentDTO> getAllPayments();
     PaymentDTO getPaymentById(Long id);
+    PaymentDTO updatePayment(Long id, PaymentDTO paymentDto);
 }

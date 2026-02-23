@@ -37,4 +37,9 @@ public class PaymentController {
     public ResponseEntity<PaymentDTO> getPaymentById(@PathVariable Long id) {
         return ResponseEntity.ok(paymentService.getPaymentById(id));
     }
+
+    @org.springframework.web.bind.annotation.PutMapping("/{id}")
+    public ResponseEntity<PaymentDTO> updatePayment(@PathVariable Long id, @RequestBody PaymentDTO dto) {
+        return ResponseEntity.ok(paymentService.updatePayment(id, dto));
+    }
 }

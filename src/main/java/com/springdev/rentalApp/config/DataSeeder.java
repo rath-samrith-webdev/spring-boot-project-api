@@ -4,50 +4,80 @@ package com.springdev.rentalApp.config;
 import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
 
 import com.springdev.rentalApp.entities.User;
 import com.springdev.rentalApp.repositories.UserRepository;
 
-@Configuration
+import java.time.LocalDateTime;
+import java.io.FileWriter;
+import java.io.IOException;
+
+@org.springframework.stereotype.Component
 public class DataSeeder implements CommandLineRunner {
 
 
     private final UserRepository userRepository;
     private final com.springdev.rentalApp.repositories.PaymentStatusRepository paymentStatusRepository;
     private final com.springdev.rentalApp.repositories.UserMonthlySavingRepository userMonthlySavingRepository;
+    private final com.springdev.rentalApp.repositories.UtilityRepository utilityRepository;
+    private final com.springdev.rentalApp.repositories.PaymentRepository paymentRepository;
     private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     public DataSeeder(UserRepository userRepository,
                       com.springdev.rentalApp.repositories.PaymentStatusRepository paymentStatusRepository,
                       com.springdev.rentalApp.repositories.UserMonthlySavingRepository userMonthlySavingRepository,
+                      com.springdev.rentalApp.repositories.UtilityRepository utilityRepository,
+                      com.springdev.rentalApp.repositories.PaymentRepository paymentRepository,
                       org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.paymentStatusRepository = paymentStatusRepository;
         this.userMonthlySavingRepository = userMonthlySavingRepository;
+        this.utilityRepository = utilityRepository;
+        this.paymentRepository = paymentRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        boolean forceSeed = false;
-        for (String arg : args) {
-            if ("--seed".equals(arg)) {
-                forceSeed = true;
-                break;
+        log("DataSeeder started.");
+        try {
+            if (paymentStatusRepository.count() == 0) {
+                log("Seeding payment statuses...");
+                seedPaymentStatuses();
             }
-        }
 
-        if (paymentStatusRepository.count() == 0 || forceSeed) {
-            seedPaymentStatuses();
-        }
+            if (userRepository.count() == 0) {
+                log("Seeding users...");
+                seedUsers();
+            }
 
-        if (userRepository.count() == 0 || forceSeed) {
-            seedUsers();
-        }
+            if (userMonthlySavingRepository.count() == 0) {
+                log("Seeding monthly savings...");
+                seedMonthlySavings();
+            }
 
-        if (userMonthlySavingRepository.count() == 0 || forceSeed) {
-            seedMonthlySavings();
+            if (utilityRepository.count() == 0) {
+                log("Seeding utilities...");
+                seedUtilities();
+            }
+
+            if (paymentRepository.count() == 0) {
+                log("Seeding payments...");
+                seedPayments();
+            }
+            log("DataSeeder finished successfully.");
+        } catch (Exception e) {
+            log("Error in DataSeeder: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void log(String message) {
+        System.out.println("[DataSeeder] " + message);
+        try (FileWriter fw = new FileWriter("seeder_debug.log", true)) {
+            fw.write(new java.util.Date() + " : " + message + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -179,5 +209,57 @@ public class DataSeeder implements CommandLineRunner {
 
         userMonthlySavingRepository.saveAll(savings);
         System.out.println("Seeded " + savings.size() + " monthly savings records.");
+    }
+
+    private void seedUtilities() {
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) return;
+
+        User user1 = users.stream().filter(u -> u.getEmail().equals("john.doe@example.com")).findFirst().orElse(users.get(0));
+
+        var u1 = new com.springdev.rentalApp.entities.Utility();
+        u1.setUser(user1);
+        u1.setLabel("Home Electricity");
+        u1.setType("electricity");
+        u1.setProvider("City Power Co.");
+        u1.setAmount(new java.math.BigDecimal("145.50"));
+        u1.setDueDate(LocalDateTime.now().plusDays(10));
+        u1.setStatus("pending");
+
+        var u2 = new com.springdev.rentalApp.entities.Utility();
+        u2.setUser(user1);
+        u2.setLabel("Water Supply");
+        u2.setType("water");
+        u2.setProvider("Municipal Water");
+        u2.setAmount(new java.math.BigDecimal("68.20"));
+        u2.setDueDate(LocalDateTime.now().plusDays(15));
+        u2.setStatus("pending");
+
+        utilityRepository.saveAll(List.of(u1, u2));
+        System.out.println("Seeded Utilities.");
+    }
+
+    private void seedPayments() {
+        List<User> users = userRepository.findAll();
+        List<com.springdev.rentalApp.entities.Utility> utilities = utilityRepository.findAll();
+        List<com.springdev.rentalApp.entities.PaymentStatus> statuses = paymentStatusRepository.findAll();
+
+        if (users.isEmpty() || utilities.isEmpty() || statuses.isEmpty()) return;
+
+        User user1 = users.stream().filter(u -> u.getEmail().equals("john.doe@example.com")).findFirst().orElse(users.get(0));
+        com.springdev.rentalApp.entities.Utility utility1 = utilities.get(0);
+        com.springdev.rentalApp.entities.PaymentStatus paidStatus = statuses.stream().filter(s -> s.getLabel().equals("PAID")).findFirst().orElse(statuses.get(0));
+
+        var p1 = new com.springdev.rentalApp.entities.Payment();
+        p1.setUtility(utility1);
+        p1.setPaidBy(user1);
+        p1.setPaymentStatus(paidStatus);
+        p1.setAmount(new java.math.BigDecimal("142.30"));
+        p1.setPaymentMethod("Bank Transfer");
+        p1.setPaidOn(LocalDateTime.now().minusMonths(1));
+        p1.setNote("December bill");
+
+        paymentRepository.save(p1);
+        System.out.println("Seeded Payments.");
     }
 }

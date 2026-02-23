@@ -72,4 +72,33 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
         return paymentMapper.toDto(payment);
     }
+
+    @Override
+    public PaymentDTO updatePayment(Long id, PaymentDTO dto) {
+        Payment payment = paymentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        if (dto.amount() != null) payment.setAmount(dto.amount());
+        if (dto.paymentMethod() != null) payment.setPaymentMethod(dto.paymentMethod());
+        if (dto.paidOn() != null) payment.setPaidOn(dto.paidOn());
+        if (dto.referenceNumber() != null) payment.setReferenceNumber(dto.referenceNumber());
+        if (dto.note() != null) payment.setNote(dto.note());
+        if (dto.currency() != null) payment.setCurrency(dto.currency());
+
+        if (dto.paymentStatusId() != null) {
+            PaymentStatus status = paymentStatusRepository.findById(dto.paymentStatusId())
+                    .orElseThrow(() -> new RuntimeException("Payment Status not found"));
+            payment.setPaymentStatus(status);
+        }
+
+        if (dto.verifiedById() != null) {
+            User verifiedBy = userRepository.findById(dto.verifiedById())
+                    .orElseThrow(() -> new RuntimeException("Verifier User not found"));
+            payment.setVerifiedBy(verifiedBy);
+            payment.setVerifiedOn(dto.verifiedOn() != null ? dto.verifiedOn() : java.time.LocalDateTime.now());
+        }
+
+        Payment saved = paymentRepository.save(payment);
+        return paymentMapper.toDto(saved);
+    }
 }
